@@ -10,10 +10,19 @@ namespace MagicVilla_API.Controllers
     [ApiController]
     public class VillaController : ControllerBase
     {
+        private readonly ILogger<VillaController> _logger;
+
+        public VillaController(ILogger<VillaController> logger)
+        {
+            _logger = logger;
+        }
+
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDto>> GetVillas()
         {
+            _logger.LogInformation("Obtener las villas");
             return Ok(VillaStore.villaList);
         }
 
@@ -23,7 +32,11 @@ namespace MagicVilla_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<VillaDto> GetVilla(int id)
         {
-            if (id == 0) return BadRequest();
+            if (id == 0)
+            {
+                _logger.LogError("Error al traer villa con Id" + id);
+                return BadRequest();
+            }
 
             var villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
 
@@ -69,14 +82,14 @@ namespace MagicVilla_API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult DeleteVilla(int id)
         {
-            if(id == 0)
+            if (id == 0)
             {
                 return BadRequest();
             }
 
             var villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
 
-            if(villa != null)
+            if (villa != null)
             {
                 return NotFound();
             }
@@ -93,13 +106,13 @@ namespace MagicVilla_API.Controllers
 
         public IActionResult UpdateVilla(int id, [FromBody] VillaDto villaDTO)
         {
-            if(villaDTO == null || id != villaDTO.Id)
+            if (villaDTO == null || id != villaDTO.Id)
             {
                 return BadRequest();
             }
 
             var villa = VillaStore.villaList.FirstOrDefault(v => v.Id == id);
-            
+
             villa.Nombre = villaDTO.Nombre;
             villa.Ocupantes = villaDTO.Ocupantes;
             villa.MetrosCuadrados = villaDTO.MetrosCuadrados;
@@ -127,7 +140,7 @@ namespace MagicVilla_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             return NoContent();
         }
 
